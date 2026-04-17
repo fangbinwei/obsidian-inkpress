@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-inkpress",
+  "name": "Inkpress",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Publish selected vault folders as a static website to cloud storage (Aliyun OSS)",
+  "author": "fangbinwei",
+  "isDesktopOnly": true,
+  "fundingUrl": "https://buymeacoffee.com/fangbinwei"
+}
