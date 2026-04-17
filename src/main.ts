@@ -2,6 +2,8 @@ import { Plugin } from 'obsidian'
 import type { InkpressSettings } from './settings/types.js'
 import { DEFAULT_SETTINGS } from './settings/defaults.js'
 import { InkpressSettingTab } from './settings/tab.js'
+import { registerCommands } from './ui/commands.js'
+import { createOSSClient, testConnection } from './oss/client.js'
 
 export default class InkpressPlugin extends Plugin {
   settings!: InkpressSettings
@@ -9,6 +11,7 @@ export default class InkpressPlugin extends Plugin {
   async onload() {
     await this.loadSettings()
     this.addSettingTab(new InkpressSettingTab(this.app, this))
+    registerCommands(this)
   }
 
   onunload() {}
@@ -22,6 +25,7 @@ export default class InkpressPlugin extends Plugin {
   }
 
   async testOSSConnection(): Promise<void> {
-    throw new Error('Not yet implemented')
+    const client = createOSSClient(this.settings.oss)
+    await testConnection(client)
   }
 }

@@ -1,0 +1,62 @@
+import { Modal, App } from 'obsidian'
+import type { FullPublishReport } from '../publish/publisher.js'
+import type { PreviewReport } from '../publish/preview.js'
+
+export class ReportModal extends Modal {
+  constructor(app: App, private report: FullPublishReport | PreviewReport, private isPreview: boolean) {
+    super(app)
+  }
+
+  onOpen() {
+    const { contentEl } = this
+    contentEl.empty()
+
+    contentEl.createEl('h3', { text: this.isPreview ? 'Publish Preview' : 'Publish Complete' })
+
+    const summary = contentEl.createDiv()
+    summary.createEl('p', { text: `Rendered: ${this.report.rendered} files` })
+
+    if ('uploaded' in this.report) {
+      summary.createEl('p', { text: `Uploaded: ${this.report.uploaded} files` })
+      summary.createEl('p', { text: `Deleted: ${this.report.deleted} files` })
+      if (this.report.accessUrl) {
+        const urlP = summary.createEl('p')
+        urlP.createEl('span', { text: 'Site URL: ' })
+        urlP.createEl('a', { text: this.report.accessUrl, href: this.report.accessUrl })
+      }
+    }
+
+    if ('willUpload' in this.report) {
+      summary.createEl('p', { text: `Will upload: ${this.report.willUpload} files` })
+      summary.createEl('p', { text: `Will delete: ${this.report.willDelete} files` })
+    }
+
+    if (this.report.skipped.length > 0) {
+      contentEl.createEl('h4', { text: `Skipped (${this.report.skipped.length})` })
+      const list = contentEl.createEl('ul')
+      for (const s of this.report.skipped) list.createEl('li', { text: `${s.path} — ${s.reason}` })
+    }
+
+    if (this.report.deadLinks.length > 0) {
+      contentEl.createEl('h4', { text: `Dead links (${this.report.deadLinks.length})` })
+      const list = contentEl.createEl('ul')
+      for (const dl of this.report.deadLinks) list.createEl('li', { text: `${dl.sourcePath}:${dl.line} → ${dl.targetLink}` })
+    }
+
+    if (this.report.missingImages.length > 0) {
+      contentEl.createEl('h4', { text: `Missing images (${this.report.missingImages.length})` })
+      const list = contentEl.createEl('ul')
+      for (const mi of this.report.missingImages) list.createEl('li', { text: `${mi.sourcePath}:${mi.line} → ${mi.imagePath}` })
+    }
+
+    if ('uploadErrors' in this.report && this.report.uploadErrors.length > 0) {
+      contentEl.createEl('h4', { text: `Upload errors (${this.report.uploadErrors.length})` })
+      const list = contentEl.createEl('ul')
+      for (const e of this.report.uploadErrors) list.createEl('li', { text: `${e.path} — ${e.error}` })
+    }
+
+    contentEl.createEl('button', { text: 'Close' }).addEventListener('click', () => this.close())
+  }
+
+  onClose() { this.contentEl.empty() }
+}
