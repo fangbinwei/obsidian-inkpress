@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS } from './settings/defaults.js'
 import { InkpressSettingTab } from './settings/tab.js'
 import { registerCommands } from './ui/commands.js'
 import { createOSSClient, testConnection } from './oss/client.js'
+import { ensureWebsiteConfig } from './oss/website.js'
 
 export default class InkpressPlugin extends Plugin {
   settings!: InkpressSettings
@@ -24,8 +25,14 @@ export default class InkpressPlugin extends Plugin {
     await this.saveData(this.settings)
   }
 
-  async testOSSConnection(): Promise<void> {
+  async testOSSConnection(): Promise<{ websiteConfigured: boolean; websiteError?: string }> {
     const client = createOSSClient(this.settings.oss)
     await testConnection(client)
+    try {
+      await ensureWebsiteConfig(client, this.settings.oss.bucket)
+      return { websiteConfigured: true }
+    } catch (e) {
+      return { websiteConfigured: false, websiteError: e instanceof Error ? e.message : String(e) }
+    }
   }
 }

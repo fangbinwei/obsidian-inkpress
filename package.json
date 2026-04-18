@@ -9,15 +9,16 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "ali-oss": "^6.20.0",
     "inkpress-renderer": "file:../inkpress-renderer",
-    "ali-oss": "^6.20.0"
+    "proxy-agent": "^8.0.1"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.20.0",
     "obsidian": "^1.5.0",
     "typescript": "^5.4.0",
-    "esbuild": "^0.20.0",
-    "vitest": "^2.0.0",
-    "@types/node": "^20.0.0",
-    "builtin-modules": "^3.3.0"
+    "vitest": "^2.0.0"
   }
 }

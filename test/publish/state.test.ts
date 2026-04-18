@@ -66,4 +66,25 @@ describe('PublishState', () => {
     expect(snapshot.files['a.html']).toBeDefined()
     expect(snapshot.files['a.html'].contentMD5).toBe(md5('aaa'))
   })
+
+  it('retains delete-failed paths in snapshot for retry', () => {
+    const priorState = {
+      version: 1, lastPublishAt: '2026-04-18T00:00:00Z',
+      files: {
+        'a.html': { contentMD5: md5('aaa'), size: 3, publishedAt: '2026-04-18T00:00:00Z' },
+        'orphan.html': { contentMD5: md5('orphan'), size: 6, publishedAt: '2026-04-18T00:00:00Z' },
+      },
+    }
+    const state = new PublishState(priorState)
+    // Current render only has a.html (orphan.html was deleted from vault)
+    const files: OutputFile[] = [{ relativePath: 'a.html', content: 'aaa', contentType: 'text/html', cacheControl: 'no-cache' }]
+
+    // orphan.html delete failed on OSS
+    const snapshot = state.createSnapshot(files, ['orphan.html'])
+
+    // orphan.html should still be in snapshot so next diff will try to delete again
+    expect(snapshot.files['orphan.html']).toBeDefined()
+    expect(snapshot.files['orphan.html'].contentMD5).toBe(md5('orphan'))
+    expect(snapshot.files['a.html']).toBeDefined()
+  })
 })

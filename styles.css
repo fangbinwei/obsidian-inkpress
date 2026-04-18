@@ -1,0 +1,8 @@
+/* Inkpress plugin styles */
+
+.inkpress-dead-link-hint {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}

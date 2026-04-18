@@ -1,6 +1,16 @@
 import { Modal, App } from 'obsidian'
 import type { FullPublishReport } from '../publish/publisher.js'
 import type { PreviewReport } from '../publish/preview.js'
+import type { DeadLinkEntry, DeadLinkReason } from 'inkpress-renderer'
+
+const REASON_LABELS: Record<DeadLinkReason, string> = {
+  'target-missing': 'Target file does not exist',
+  'not-published': 'Target exists but is outside publishDirs',
+  'unsupported-asset': 'Unsupported asset type',
+  'ambiguous': 'Ambiguous — multiple files match',
+}
+
+const REASON_ORDER: DeadLinkReason[] = ['target-missing', 'not-published', 'ambiguous', 'unsupported-asset']
 
 export class ReportModal extends Modal {
   constructor(app: App, private report: FullPublishReport | PreviewReport, private isPreview: boolean) {
@@ -39,8 +49,22 @@ export class ReportModal extends Modal {
 
     if (this.report.deadLinks.length > 0) {
       contentEl.createEl('h4', { text: `Dead links (${this.report.deadLinks.length})` })
-      const list = contentEl.createEl('ul')
-      for (const dl of this.report.deadLinks) list.createEl('li', { text: `${dl.sourcePath}:${dl.line} → ${dl.targetLink}` })
+      const grouped = new Map<DeadLinkReason, DeadLinkEntry[]>()
+      for (const dl of this.report.deadLinks) {
+        const arr = grouped.get(dl.reason) || []
+        arr.push(dl)
+        grouped.set(dl.reason, arr)
+      }
+      for (const reason of REASON_ORDER) {
+        const entries = grouped.get(reason)
+        if (!entries || entries.length === 0) continue
+        contentEl.createEl('h5', { text: `${REASON_LABELS[reason]} (${entries.length})` })
+        contentEl.createEl('p', { text: entries[0].hint, cls: 'inkpress-dead-link-hint' })
+        const list = contentEl.createEl('ul')
+        for (const dl of entries) {
+          list.createEl('li', { text: `${dl.sourcePath}:${dl.line} → ${dl.targetLink}` })
+        }
+      }
     }
 
     if (this.report.missingImages.length > 0) {

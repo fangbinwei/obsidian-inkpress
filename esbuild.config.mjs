@@ -23,6 +23,7 @@ esbuild.build({
     ...builtinModules,
   ],
   format: 'cjs',
+  platform: 'node',
   target: 'es2020',
   logLevel: 'info',
   sourcemap: production ? false : 'inline',

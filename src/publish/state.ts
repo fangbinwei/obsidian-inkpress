@@ -41,12 +41,20 @@ export class PublishState {
     return { toUpload, toDelete }
   }
 
-  createSnapshot(files: OutputFile[]): PublishSnapshot {
+  createSnapshot(files: OutputFile[], deleteFailedPaths: string[] = []): PublishSnapshot {
     const now = new Date().toISOString()
     const fileEntries: PublishSnapshot['files'] = {}
     for (const file of files) {
       const content = typeof file.content === 'string' ? file.content : file.content.toString()
       fileEntries[file.relativePath] = { contentMD5: computeMD5(file.content), size: content.length, publishedAt: now }
+    }
+    // Keep delete-failed paths in snapshot so next publish retries deletion
+    if (this.prior) {
+      for (const path of deleteFailedPaths) {
+        if (this.prior.files[path]) {
+          fileEntries[path] = this.prior.files[path]
+        }
+      }
     }
     return { version: 1, lastPublishAt: now, files: fileEntries }
   }

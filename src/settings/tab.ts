@@ -2,8 +2,9 @@ import { App, PluginSettingTab, Setting, FuzzySuggestModal, TFolder, Notice } fr
 import type InkpressPlugin from '../main.js'
 import { OSS_REGIONS } from './types.js'
 import { detectRootAccountKey } from './validator.js'
+import { runPublish, runPreviewCommand } from '../ui/commands.js'
 
-const BUY_ME_A_COFFEE_URL = 'https://buymeacoffee.com/fangbinwei'
+const KOFI_URL = 'https://ko-fi.com/fangbinwei'
 
 export class InkpressSettingTab extends PluginSettingTab {
   plugin: InkpressPlugin
@@ -99,8 +100,12 @@ export class InkpressSettingTab extends PluginSettingTab {
           button.setButtonText('Testing...')
           button.setDisabled(true)
           try {
-            await this.plugin.testOSSConnection()
-            new Notice('OSS connection successful!')
+            const result = await this.plugin.testOSSConnection()
+            if (result.websiteConfigured) {
+              new Notice('OSS connection successful! Static website hosting configured.')
+            } else {
+              new Notice(`OSS connected, but couldn't set static website config: ${result.websiteError}`)
+            }
           } catch (e) {
             new Notice(`OSS connection failed: ${e instanceof Error ? e.message : String(e)}`)
           } finally {
@@ -115,9 +120,9 @@ export class InkpressSettingTab extends PluginSettingTab {
     for (let i = 0; i < this.plugin.settings.publishDirs.length; i++) {
       new Setting(containerEl)
         .setName(this.plugin.settings.publishDirs[i])
-        .addButton(button => button
-          .setButtonText('Remove')
-          .setWarning()
+        .addExtraButton(button => button
+          .setIcon('trash-2')
+          .setTooltip('Remove')
           .onClick(async () => {
             this.plugin.settings.publishDirs.splice(i, 1)
             await this.plugin.saveSettings()
@@ -178,15 +183,43 @@ export class InkpressSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings()
         }))
 
+    // Actions
+    containerEl.createEl('h2', { text: 'Actions' })
+
+    new Setting(containerEl)
+      .setName('Preview')
+      .setDesc('Show what would be uploaded, deleted, and skipped — nothing is sent to OSS.')
+      .addButton(button => button
+        .setButtonText('Preview')
+        .onClick(() => runPreviewCommand(this.plugin)))
+
+    new Setting(containerEl)
+      .setName('Publish')
+      .setDesc('Render and upload to OSS now.')
+      .addButton(button => button
+        .setButtonText('Publish')
+        .setCta()
+        .onClick(() => runPublish(this.plugin)))
+
     // Support
     containerEl.createEl('h2', { text: 'Support' })
 
-    new Setting(containerEl)
-      .setName('Buy me a coffee')
-      .setDesc('If you find this plugin useful, consider supporting its development.')
-      .addButton(button => button
-        .setButtonText('Support')
-        .onClick(() => { window.open(BUY_ME_A_COFFEE_URL, '_blank') }))
+    const donateSetting = new Setting(containerEl)
+      .setName('Donate')
+      .setDesc('If you like this Plugin, consider donating to support continued development.')
+
+    const kofiLink = donateSetting.controlEl.createEl('a', {
+      href: KOFI_URL,
+      attr: { target: '_blank', rel: 'noopener' },
+    })
+    kofiLink.createEl('img', {
+      attr: {
+        src: 'https://storage.ko-fi.com/cdn/kofi6.png?v=6',
+        alt: 'Buy Me a Coffee at ko-fi.com',
+        height: '36',
+        style: 'border:0;height:36px;',
+      },
+    })
   }
 }
 

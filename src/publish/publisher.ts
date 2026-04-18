@@ -13,10 +13,15 @@ export interface FullPublishReport extends PublishReport {
   accessUrl: string | null
 }
 
+export class PublishCancelledError extends Error {
+  constructor() { super('Publish cancelled') }
+}
+
 export interface PublishCallbacks {
   onRenderProgress?: (current: number, total: number) => void
   onUploadProgress?: (current: number, total: number) => void
   onPhase?: (phase: 'rendering' | 'diffing' | 'uploading' | 'deleting' | 'done') => void
+  signal?: AbortSignal
 }
 
 export async function publish(
@@ -25,6 +30,8 @@ export async function publish(
   priorSnapshot: PublishSnapshot | null,
   callbacks?: PublishCallbacks,
 ): Promise<{ report: FullPublishReport; snapshot: PublishSnapshot }> {
+  const signal = callbacks?.signal
+
   callbacks?.onPhase?.('rendering')
   const renderResult = await renderSite({
     vaultPath: '.',
@@ -36,25 +43,40 @@ export async function publish(
     onProgress: (_phase, current, total) => {
       callbacks?.onRenderProgress?.(current, total)
     },
+    signal,
   })
+
+  if (signal?.aborted) throw new PublishCancelledError()
 
   callbacks?.onPhase?.('diffing')
   const state = new PublishState(priorSnapshot)
   const diff = state.diff(renderResult.files)
 
+  if (signal?.aborted) throw new PublishCancelledError()
+
   callbacks?.onPhase?.('uploading')
   const client = createOSSClient(settings.oss)
   const uploader = new OSSUploader(client, settings.oss.prefix)
-  const uploadResult = await uploader.upload(diff.toUpload, callbacks?.onUploadProgress)
+  const uploadResult = await uploader.upload(diff.toUpload, callbacks?.onUploadProgress, signal)
+
+  if (signal?.aborted) throw new PublishCancelledError()
 
   callbacks?.onPhase?.('deleting')
-  if (diff.toDelete.length > 0) await uploader.deleteFiles(diff.toDelete)
+  let deletedCount = 0
+  let deleteFailedPaths: string[] = []
+  if (diff.toDelete.length > 0) {
+    const deleteResult = await uploader.deleteFiles(diff.toDelete)
+    deletedCount = deleteResult.deleted.length
+    deleteFailedPaths = deleteResult.failed
+  }
 
-  const snapshot = state.createSnapshot(renderResult.files)
+  // Build snapshot: include delete-failed paths so next publish retries deletion
+  const snapshot = state.createSnapshot(renderResult.files, deleteFailedPaths)
 
   let accessUrl: string | null = null
   if (settings.oss.customDomain) {
-    const prefix = settings.oss.prefix ? `/${settings.oss.prefix}` : ''
+    const trimmedPrefix = settings.oss.prefix.replace(/^\/+|\/+$/g, '')
+    const prefix = trimmedPrefix ? `/${trimmedPrefix}` : ''
     accessUrl = `https://${settings.oss.customDomain}${prefix}`
   }
 
@@ -64,7 +86,7 @@ export async function publish(
     report: {
       ...renderResult.report,
       uploaded: uploadResult.uploaded.length,
-      deleted: diff.toDelete.length,
+      deleted: deletedCount,
       uploadErrors: uploadResult.failed,
       accessUrl,
     },

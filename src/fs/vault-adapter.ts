@@ -16,7 +16,9 @@ export function createVaultAdapter(vault: Vault): FileSystemAdapter {
       return vault.read(file)
     },
     async listFiles(dir: string): Promise<string[]> {
-      const folder = vault.getAbstractFileByPath(dir)
+      const folder = dir === '' || dir === '.' || dir === '/'
+        ? vault.getRoot()
+        : vault.getAbstractFileByPath(dir)
       if (!(folder instanceof TFolder)) throw new Error(`Directory not found: ${dir}`)
       const files: string[] = []
       const recurse = (f: TFolder) => {
