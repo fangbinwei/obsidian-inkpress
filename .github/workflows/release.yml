@@ -11,15 +11,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout obsidian-inkpress
-        uses: actions/checkout@v4
-        with:
-          path: obsidian-inkpress
-      - name: Checkout inkpress-renderer
-        uses: actions/checkout@v4
-        with:
-          repository: fangbinwei/inkpress-renderer
-          path: inkpress-renderer
+      - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -27,21 +19,11 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          cache-dependency-path: obsidian-inkpress/pnpm-lock.yaml
-      - name: Build inkpress-renderer
-        working-directory: inkpress-renderer
-        run: |
-          pnpm install --no-frozen-lockfile
-          pnpm run build
-      - name: Install obsidian-inkpress
-        working-directory: obsidian-inkpress
-        run: pnpm install --frozen-lockfile
-      - name: Build
-        working-directory: obsidian-inkpress
-        run: pnpm run build
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            obsidian-inkpress/main.js
-            obsidian-inkpress/manifest.json
-            obsidian-inkpress/styles.css
+            main.js
+            manifest.json
+            styles.css
