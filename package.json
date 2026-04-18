@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "ali-oss": "^6.20.0",
-    "inkpress-renderer": "file:../inkpress-renderer",
+    "inkpress-renderer": "^0.1.0",
     "proxy-agent": "^8.0.1"
   },
   "devDependencies": {
