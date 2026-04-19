@@ -10,7 +10,8 @@
     "format": "biome format --write",
     "lint": "biome lint",
     "check": "biome check --write",
-    "check:ci": "biome ci"
+    "check:ci": "biome ci",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "dependencies": {
     "ali-oss": "^6.20.0",
