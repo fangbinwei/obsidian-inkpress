@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "ali-oss": "^6.20.0",
-    "inkpress-renderer": "^0.2.0",
+    "inkpress-renderer": "^0.2.1",
     "proxy-agent": "^8.0.1"
   },
   "devDependencies": {
