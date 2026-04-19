@@ -1,8 +1,4 @@
-import type {
-  FileSystemAdapter,
-  OutputFile,
-  PublishReport,
-} from 'inkpress-renderer'
+import type { FileSystemAdapter, PublishReport } from 'inkpress-renderer'
 import { DefaultTheme, renderSite } from 'inkpress-renderer'
 import { createOSSClient } from '../oss/client.js'
 import { OSSUploader } from '../oss/uploader.js'

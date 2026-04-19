@@ -48,6 +48,15 @@
     {
       "includes": ["**/*.md"],
       "formatter": { "enabled": false }
+    },
+    {
+      "includes": ["test/**", "**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": { "noNonNullAssertion": "off" },
+          "suspicious": { "noExplicitAny": "off" }
+        }
+      }
     }
   ]
 }

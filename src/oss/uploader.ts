@@ -1,3 +1,4 @@
+import type OSS from 'ali-oss'
 import type { OutputFile } from 'inkpress-renderer'
 
 interface UploadResult {
@@ -10,7 +11,7 @@ const RETRY_DELAYS = [1000, 3000]
 
 export class OSSUploader {
   constructor(
-    private client: any,
+    private client: OSS,
     prefix: string,
   ) {
     // Normalize prefix: strip leading/trailing slashes, then add trailing slash if non-empty

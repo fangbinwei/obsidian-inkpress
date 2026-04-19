@@ -1,17 +1,33 @@
+import type OSS from 'ali-oss'
+
 const DESIRED_INDEX = 'index.html'
 const DESIRED_SUPPORT_SUBDIR = 'true'
 const DESIRED_TYPE = '0'
 
+type BucketWebsiteConfig = {
+  index?: string
+  supportSubDir?: string | boolean
+  type?: string | number
+  error?: string
+  routingRules?: unknown[]
+}
+
 export async function ensureWebsiteConfig(
-  client: any,
+  client: OSS,
   bucket: string,
 ): Promise<void> {
-  let existing: any = null
+  let existing: BucketWebsiteConfig | null = null
   try {
-    existing = await client.getBucketWebsite(bucket)
-  } catch (e: any) {
-    const status = e?.status ?? e?.statusCode
-    const code = e?.code ?? e?.name
+    existing = (await client.getBucketWebsite(bucket)) as BucketWebsiteConfig
+  } catch (e: unknown) {
+    const err = e as {
+      status?: number
+      statusCode?: number
+      code?: string
+      name?: string
+    }
+    const status = err.status ?? err.statusCode
+    const code = err.code ?? err.name
     if (status !== 404 && code !== 'NoSuchWebsiteConfigurationError') {
       throw e
     }
@@ -37,5 +53,8 @@ export async function ensureWebsiteConfig(
     config.routingRules = existing.routingRules
   }
 
-  await client.putBucketWebsite(bucket, config)
+  await client.putBucketWebsite(
+    bucket,
+    config as unknown as OSS.PutBucketWebsiteConfig,
+  )
 }

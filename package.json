@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.12",
+    "@types/ali-oss": "^6.23.3",
     "@types/node": "^20.0.0",
     "builtin-modules": "^3.3.0",
     "esbuild": "^0.20.0",
