@@ -1,10 +1,13 @@
-import { createHash } from 'crypto'
+import { createHash } from 'node:crypto'
 import type { OutputFile } from 'inkpress-renderer'
 
 export interface PublishSnapshot {
   version: number
   lastPublishAt: string
-  files: Record<string, { contentMD5: string; size: number; publishedAt: string }>
+  files: Record<
+    string,
+    { contentMD5: string; size: number; publishedAt: string }
+  >
 }
 
 export interface PublishDiff {
@@ -26,7 +29,10 @@ export class PublishState {
     for (const file of files) {
       currentPaths.add(file.relativePath)
       const hash = computeMD5(file.content)
-      if (!this.prior) { toUpload.push(file); continue }
+      if (!this.prior) {
+        toUpload.push(file)
+        continue
+      }
       const priorEntry = this.prior.files[file.relativePath]
       if (!priorEntry || priorEntry.contentMD5 !== hash) toUpload.push(file)
     }
@@ -41,12 +47,22 @@ export class PublishState {
     return { toUpload, toDelete }
   }
 
-  createSnapshot(files: OutputFile[], deleteFailedPaths: string[] = []): PublishSnapshot {
+  createSnapshot(
+    files: OutputFile[],
+    deleteFailedPaths: string[] = [],
+  ): PublishSnapshot {
     const now = new Date().toISOString()
     const fileEntries: PublishSnapshot['files'] = {}
     for (const file of files) {
-      const content = typeof file.content === 'string' ? file.content : file.content.toString()
-      fileEntries[file.relativePath] = { contentMD5: computeMD5(file.content), size: content.length, publishedAt: now }
+      const content =
+        typeof file.content === 'string'
+          ? file.content
+          : file.content.toString()
+      fileEntries[file.relativePath] = {
+        contentMD5: computeMD5(file.content),
+        size: content.length,
+        publishedAt: now,
+      }
     }
     // Keep delete-failed paths in snapshot so next publish retries deletion
     if (this.prior) {

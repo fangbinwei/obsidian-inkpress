@@ -6,7 +6,11 @@
     "dev": "node esbuild.config.mjs",
     "build": "node esbuild.config.mjs production",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "format": "biome format --write",
+    "lint": "biome lint",
+    "check": "biome check --write",
+    "check:ci": "biome ci"
   },
   "dependencies": {
     "ali-oss": "^6.20.0",
@@ -14,6 +18,7 @@
     "proxy-agent": "^8.0.1"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.12",
     "@types/node": "^20.0.0",
     "builtin-modules": "^3.3.0",
     "esbuild": "^0.20.0",

@@ -1,10 +1,14 @@
-import { renderSite, DefaultTheme } from 'inkpress-renderer'
-import type { PublishReport, OutputFile, FileSystemAdapter } from 'inkpress-renderer'
-import type { InkpressSettings } from '../settings/types.js'
+import type {
+  FileSystemAdapter,
+  OutputFile,
+  PublishReport,
+} from 'inkpress-renderer'
+import { DefaultTheme, renderSite } from 'inkpress-renderer'
 import { createOSSClient } from '../oss/client.js'
 import { OSSUploader } from '../oss/uploader.js'
-import { PublishState } from './state.js'
+import type { InkpressSettings } from '../settings/types.js'
 import type { PublishSnapshot } from './state.js'
+import { PublishState } from './state.js'
 
 export interface FullPublishReport extends PublishReport {
   uploaded: number
@@ -14,13 +18,17 @@ export interface FullPublishReport extends PublishReport {
 }
 
 export class PublishCancelledError extends Error {
-  constructor() { super('Publish cancelled') }
+  constructor() {
+    super('Publish cancelled')
+  }
 }
 
 export interface PublishCallbacks {
   onRenderProgress?: (current: number, total: number) => void
   onUploadProgress?: (current: number, total: number) => void
-  onPhase?: (phase: 'rendering' | 'diffing' | 'uploading' | 'deleting' | 'done') => void
+  onPhase?: (
+    phase: 'rendering' | 'diffing' | 'uploading' | 'deleting' | 'done',
+  ) => void
   signal?: AbortSignal
 }
 
@@ -57,7 +65,11 @@ export async function publish(
   callbacks?.onPhase?.('uploading')
   const client = createOSSClient(settings.oss)
   const uploader = new OSSUploader(client, settings.oss.prefix)
-  const uploadResult = await uploader.upload(diff.toUpload, callbacks?.onUploadProgress, signal)
+  const uploadResult = await uploader.upload(
+    diff.toUpload,
+    callbacks?.onUploadProgress,
+    signal,
+  )
 
   if (signal?.aborted) throw new PublishCancelledError()
 

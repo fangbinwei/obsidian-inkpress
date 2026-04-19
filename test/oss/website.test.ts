@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { ensureWebsiteConfig } from '../../src/oss/website.js'
 
 function makeClient(opts: { existing?: any; getError?: any } = {}) {
@@ -27,7 +27,13 @@ describe('ensureWebsiteConfig', () => {
 
   it('skips write when existing config already matches desired state', async () => {
     const client = makeClient({
-      existing: { index: 'index.html', supportSubDir: 'true', type: '0', routingRules: [], error: null },
+      existing: {
+        index: 'index.html',
+        supportSubDir: 'true',
+        type: '0',
+        routingRules: [],
+        error: null,
+      },
     })
 
     await ensureWebsiteConfig(client as any, 'my-bucket')
@@ -63,7 +69,9 @@ describe('ensureWebsiteConfig', () => {
     err.code = 'AccessDenied'
     const client = makeClient({ getError: err })
 
-    await expect(ensureWebsiteConfig(client as any, 'my-bucket')).rejects.toThrow('access denied')
+    await expect(
+      ensureWebsiteConfig(client as any, 'my-bucket'),
+    ).rejects.toThrow('access denied')
     expect(client.putBucketWebsite).not.toHaveBeenCalled()
   })
 })

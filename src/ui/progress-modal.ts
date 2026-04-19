@@ -1,4 +1,4 @@
-import { Modal, App } from 'obsidian'
+import { type App, Modal } from 'obsidian'
 
 export class ProgressModal extends Modal {
   private renderBar!: HTMLElement
@@ -7,7 +7,10 @@ export class ProgressModal extends Modal {
   private uploadText!: HTMLElement
   private cancelled = false
 
-  constructor(app: App, private onCancel?: () => void) {
+  constructor(
+    app: App,
+    private onCancel?: () => void,
+  ) {
     super(app)
   }
 
@@ -16,18 +19,32 @@ export class ProgressModal extends Modal {
     contentEl.empty()
     contentEl.createEl('h3', { text: 'Publishing...' })
 
-    contentEl.createEl('div', { text: 'Rendering', cls: 'inkpress-progress-label' })
-    const renderContainer = contentEl.createDiv({ cls: 'inkpress-progress-container' })
+    contentEl.createEl('div', {
+      text: 'Rendering',
+      cls: 'inkpress-progress-label',
+    })
+    const renderContainer = contentEl.createDiv({
+      cls: 'inkpress-progress-container',
+    })
     this.renderBar = renderContainer.createDiv({ cls: 'inkpress-progress-bar' })
     this.renderText = contentEl.createDiv({ cls: 'inkpress-progress-text' })
 
-    contentEl.createEl('div', { text: 'Uploading', cls: 'inkpress-progress-label' })
-    const uploadContainer = contentEl.createDiv({ cls: 'inkpress-progress-container' })
+    contentEl.createEl('div', {
+      text: 'Uploading',
+      cls: 'inkpress-progress-label',
+    })
+    const uploadContainer = contentEl.createDiv({
+      cls: 'inkpress-progress-container',
+    })
     this.uploadBar = uploadContainer.createDiv({ cls: 'inkpress-progress-bar' })
     this.uploadText = contentEl.createDiv({ cls: 'inkpress-progress-text' })
 
     const cancelBtn = contentEl.createEl('button', { text: 'Cancel' })
-    cancelBtn.addEventListener('click', () => { this.cancelled = true; this.onCancel?.(); this.close() })
+    cancelBtn.addEventListener('click', () => {
+      this.cancelled = true
+      this.onCancel?.()
+      this.close()
+    })
 
     contentEl.createEl('style').textContent = `
       .inkpress-progress-container { background: var(--background-modifier-border); border-radius: 4px; height: 8px; margin: 4px 0 8px; }
@@ -49,7 +66,11 @@ export class ProgressModal extends Modal {
     this.uploadText.textContent = `${current} / ${total} files`
   }
 
-  isCancelled(): boolean { return this.cancelled }
+  isCancelled(): boolean {
+    return this.cancelled
+  }
 
-  onClose() { this.contentEl.empty() }
+  onClose() {
+    this.contentEl.empty()
+  }
 }

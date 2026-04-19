@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
-import { OSSUploader } from '../../src/oss/uploader.js'
 import type { OutputFile } from 'inkpress-renderer'
+import { describe, expect, it, vi } from 'vitest'
+import { OSSUploader } from '../../src/oss/uploader.js'
 
 function createMockClient() {
   return {
@@ -13,38 +13,77 @@ describe('OSSUploader', () => {
   it('uploads files with correct headers', async () => {
     const client = createMockClient()
     const uploader = new OSSUploader(client as any, '')
-    const file: OutputFile = { relativePath: 'notes/test.html', content: '<h1>Test</h1>', contentType: 'text/html', cacheControl: 'no-cache' }
+    const file: OutputFile = {
+      relativePath: 'notes/test.html',
+      content: '<h1>Test</h1>',
+      contentType: 'text/html',
+      cacheControl: 'no-cache',
+    }
     await uploader.upload([file])
-    expect(client.put).toHaveBeenCalledWith('notes/test.html', Buffer.from('<h1>Test</h1>'), { headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' } })
+    expect(client.put).toHaveBeenCalledWith(
+      'notes/test.html',
+      Buffer.from('<h1>Test</h1>'),
+      { headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' } },
+    )
   })
 
   it('prepends prefix to file paths', async () => {
     const client = createMockClient()
     const uploader = new OSSUploader(client as any, 'blog/')
-    const file: OutputFile = { relativePath: 'index.html', content: '<h1>Home</h1>', contentType: 'text/html', cacheControl: 'no-cache' }
+    const file: OutputFile = {
+      relativePath: 'index.html',
+      content: '<h1>Home</h1>',
+      contentType: 'text/html',
+      cacheControl: 'no-cache',
+    }
     await uploader.upload([file])
-    expect(client.put).toHaveBeenCalledWith('blog/index.html', expect.any(Buffer), expect.any(Object))
+    expect(client.put).toHaveBeenCalledWith(
+      'blog/index.html',
+      expect.any(Buffer),
+      expect.any(Object),
+    )
   })
 
   it('normalizes prefix variants', async () => {
     const client = createMockClient()
-    const file: OutputFile = { relativePath: 'index.html', content: 'x', contentType: 'text/html', cacheControl: 'no-cache' }
+    const file: OutputFile = {
+      relativePath: 'index.html',
+      content: 'x',
+      contentType: 'text/html',
+      cacheControl: 'no-cache',
+    }
 
     // No trailing slash
     await new OSSUploader(client as any, 'blog').upload([file])
-    expect(client.put).toHaveBeenLastCalledWith('blog/index.html', expect.any(Buffer), expect.any(Object))
+    expect(client.put).toHaveBeenLastCalledWith(
+      'blog/index.html',
+      expect.any(Buffer),
+      expect.any(Object),
+    )
 
     // Leading slash
     await new OSSUploader(client as any, '/blog/').upload([file])
-    expect(client.put).toHaveBeenLastCalledWith('blog/index.html', expect.any(Buffer), expect.any(Object))
+    expect(client.put).toHaveBeenLastCalledWith(
+      'blog/index.html',
+      expect.any(Buffer),
+      expect.any(Object),
+    )
 
     // Double slashes
     await new OSSUploader(client as any, '//blog//').upload([file])
-    expect(client.put).toHaveBeenLastCalledWith('blog/index.html', expect.any(Buffer), expect.any(Object))
+    expect(client.put).toHaveBeenLastCalledWith(
+      'blog/index.html',
+      expect.any(Buffer),
+      expect.any(Object),
+    )
 
     // Empty
     await new OSSUploader(client as any, '').upload([file])
-    expect(client.put).toHaveBeenLastCalledWith('index.html', expect.any(Buffer), expect.any(Object))
+    expect(client.put).toHaveBeenLastCalledWith(
+      'index.html',
+      expect.any(Buffer),
+      expect.any(Object),
+    )
   })
 
   it('deletes files and returns results', async () => {
@@ -69,9 +108,17 @@ describe('OSSUploader', () => {
 
   it('retries failed uploads up to 2 times', async () => {
     const client = createMockClient()
-    client.put.mockRejectedValueOnce(new Error('timeout')).mockRejectedValueOnce(new Error('timeout')).mockResolvedValueOnce({ res: { status: 200 } })
+    client.put
+      .mockRejectedValueOnce(new Error('timeout'))
+      .mockRejectedValueOnce(new Error('timeout'))
+      .mockResolvedValueOnce({ res: { status: 200 } })
     const uploader = new OSSUploader(client as any, '')
-    const file: OutputFile = { relativePath: 'test.html', content: 'content', contentType: 'text/html', cacheControl: 'no-cache' }
+    const file: OutputFile = {
+      relativePath: 'test.html',
+      content: 'content',
+      contentType: 'text/html',
+      cacheControl: 'no-cache',
+    }
     const result = await uploader.upload([file])
     expect(result.failed).toHaveLength(0)
     expect(client.put).toHaveBeenCalledTimes(3)
@@ -81,7 +128,12 @@ describe('OSSUploader', () => {
     const client = createMockClient()
     client.put.mockRejectedValue(new Error('permanent error'))
     const uploader = new OSSUploader(client as any, '')
-    const file: OutputFile = { relativePath: 'test.html', content: 'content', contentType: 'text/html', cacheControl: 'no-cache' }
+    const file: OutputFile = {
+      relativePath: 'test.html',
+      content: 'content',
+      contentType: 'text/html',
+      cacheControl: 'no-cache',
+    }
     const result = await uploader.upload([file])
     expect(result.failed).toHaveLength(1)
     expect(result.failed[0].path).toBe('test.html')
@@ -91,9 +143,24 @@ describe('OSSUploader', () => {
     const client = createMockClient()
     const uploader = new OSSUploader(client as any, '')
     const files: OutputFile[] = [
-      { relativePath: 'a.html', content: 'a', contentType: 'text/html', cacheControl: 'no-cache' },
-      { relativePath: 'b.html', content: 'b', contentType: 'text/html', cacheControl: 'no-cache' },
-      { relativePath: 'c.html', content: 'c', contentType: 'text/html', cacheControl: 'no-cache' },
+      {
+        relativePath: 'a.html',
+        content: 'a',
+        contentType: 'text/html',
+        cacheControl: 'no-cache',
+      },
+      {
+        relativePath: 'b.html',
+        content: 'b',
+        contentType: 'text/html',
+        cacheControl: 'no-cache',
+      },
+      {
+        relativePath: 'c.html',
+        content: 'c',
+        contentType: 'text/html',
+        cacheControl: 'no-cache',
+      },
     ]
 
     const controller = new AbortController()
@@ -117,7 +184,12 @@ describe('OSSUploader', () => {
     controller.abort() // Pre-abort
 
     const files: OutputFile[] = [
-      { relativePath: 'a.html', content: 'a', contentType: 'text/html', cacheControl: 'no-cache' },
+      {
+        relativePath: 'a.html',
+        content: 'a',
+        contentType: 'text/html',
+        cacheControl: 'no-cache',
+      },
     ]
 
     const result = await uploader.upload(files, undefined, controller.signal)

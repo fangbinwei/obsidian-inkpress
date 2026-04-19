@@ -3,11 +3,20 @@ export interface ValidationResult {
   error?: string
 }
 
-export function validateOSSConfig(config: { accessKeyId: string; accessKeySecret: string; bucket: string; region: string }): ValidationResult {
-  if (!config.accessKeyId.trim()) return { valid: false, error: 'AccessKey ID is required' }
-  if (!config.accessKeySecret.trim()) return { valid: false, error: 'AccessKey Secret is required' }
-  if (!config.bucket.trim()) return { valid: false, error: 'Bucket name is required' }
-  if (!config.region.trim()) return { valid: false, error: 'Region is required' }
+export function validateOSSConfig(config: {
+  accessKeyId: string
+  accessKeySecret: string
+  bucket: string
+  region: string
+}): ValidationResult {
+  if (!config.accessKeyId.trim())
+    return { valid: false, error: 'AccessKey ID is required' }
+  if (!config.accessKeySecret.trim())
+    return { valid: false, error: 'AccessKey Secret is required' }
+  if (!config.bucket.trim())
+    return { valid: false, error: 'Bucket name is required' }
+  if (!config.region.trim())
+    return { valid: false, error: 'Region is required' }
   return { valid: true }
 }
 

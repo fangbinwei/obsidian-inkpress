@@ -2,7 +2,10 @@ const DESIRED_INDEX = 'index.html'
 const DESIRED_SUPPORT_SUBDIR = 'true'
 const DESIRED_TYPE = '0'
 
-export async function ensureWebsiteConfig(client: any, bucket: string): Promise<void> {
+export async function ensureWebsiteConfig(
+  client: any,
+  bucket: string,
+): Promise<void> {
   let existing: any = null
   try {
     existing = await client.getBucketWebsite(bucket)
