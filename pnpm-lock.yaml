@@ -12,8 +12,8 @@ importers:
         specifier: ^6.20.0
         version: 6.23.0(proxy-agent@8.0.1)
       inkpress-renderer:
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.2.0
+        version: 0.2.0
       proxy-agent:
         specifier: ^8.0.1
         version: 8.0.1
@@ -904,8 +904,8 @@ packages:
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
-  inkpress-renderer@0.1.1:
-    resolution: {integrity: sha512-o/ObteKgxv+NumSka4C7uz7DV/owD86Z/KD7BaIa78IGhwrisKwl3tLVc8iMf5XKfD1RK/q7Cshy3b22aJ8y3A==}
+  inkpress-renderer@0.2.0:
+    resolution: {integrity: sha512-8wzWninLTye3QpCBQafmR7E9pck+A4UeUcBsLRJg04wdVo2xZfDzB8GXFXTw3/uT+Fdxpwh0It0AGfDPAbGU8g==}
     engines: {node: '>=20.0.0'}
 
   ip-address@10.1.0:
@@ -2231,7 +2231,7 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  inkpress-renderer@0.1.1:
+  inkpress-renderer@0.2.0:
     dependencies:
       rehype-stringify: 10.0.1
       remark-frontmatter: 5.0.0

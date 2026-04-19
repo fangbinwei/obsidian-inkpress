@@ -4,11 +4,16 @@ English | [简体中文](./README.zh-CN.md)
 
 Publish selected Obsidian vault folders as a static website to Aliyun OSS — with one click.
 
+![Inkpress default theme](./docs/preview.png)
+
+## Default theme
+
+Reading-first layout with sidebar nav, breadcrumb, TOC, backlinks, dark mode, and a `?` keyboard shortcut overlay. Three variants ship — `technical` (default), `editorial`, `manuscript` — each in light + dark.
+
 ## Features
 
 - **One-click publish** — run a single command from the Obsidian command palette
 - **Incremental sync** — only uploads changed files, keeping deploys fast
-- **Default theme** — responsive sidebar, breadcrumb navigation, and dark mode out of the box
 - **Wikilink support** — `[[wikilinks]]` are resolved and rendered as HTML links
 - **Dead link handling** — broken wikilinks are detected and handled gracefully
 - **Publish preview (dry run)** — preview which files would be added, updated, or deleted before committing
